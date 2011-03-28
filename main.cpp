@@ -4,9 +4,8 @@
 using namespace std;
 using namespace DollarRecognizer;
 
-int main()
+Path2D sampleGest()
 {
-    GeometricRecognizer g;
     Path2D path;
     path.push_back(Point2D(68,222));
     path.push_back(Point2D(70,220));
@@ -75,13 +74,19 @@ int main()
     path.push_back(Point2D(165,194));
     path.push_back(Point2D(164,196));
 
+    return path;
+}
+
+int main()
+{
+    GeometricRecognizer g;
     g.loadTemplates();
 
     // Sub-list of templates to search inside, should end by a "0"
     string gesturesList[] = {"Circle", "Delete", "Arrow", "0"};
     g.activateTemplates(gesturesList);
 
-    RecognitionResult r=g.recognize(path);
+    RecognitionResult r=g.recognize(sampleGest());
 
     cout << "Recognized gesture: " << r.name << endl;
     cout << "Score:" << r.score << endl;
