@@ -13,7 +13,7 @@ namespace DollarRecognizer
 {
 	class GeometricRecognizer
 	{
-	protected:
+        protected:
 		//--- These are variables because C++ doesn't (easily) allow
 		//---  constants to be floating point numbers
 		double halfDiagonal;
@@ -28,8 +28,10 @@ namespace DollarRecognizer
 		
 		bool shouldIgnoreRotation;
 
-		//--- What we match the input shape against
-		GestureTemplates templates;
+                //--- All templates saved in the library
+                GestureTemplates allTemplates;
+                //--- What we match the input shape against (sub part of allTemplates)
+                GestureTemplates templates;
 
 	public:
 		GeometricRecognizer();
@@ -53,7 +55,12 @@ namespace DollarRecognizer
 		void   setRotationInvariance(bool ignoreRotation);
 		Path2D translateToOrigin(Path2D points);
 
-		void loadTemplates();
+                void loadTemplates();
+                void activateTemplates(const string[]);
+                void activateTemplates();
+        private:
+                bool inTemplates(string, const string[]);
+
 	};
 }
 #endif

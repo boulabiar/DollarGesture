@@ -76,6 +76,11 @@ int main()
     path.push_back(Point2D(164,196));
 
     g.loadTemplates();
+
+    // Sub-list of templates to search inside, should end by a "0"
+    string gesturesList[] = {"Circle", "Delete", "Arrow", "0"};
+    g.activateTemplates(gesturesList);
+
     RecognitionResult r=g.recognize(path);
 
     cout << "Recognized gesture: " << r.name << endl;

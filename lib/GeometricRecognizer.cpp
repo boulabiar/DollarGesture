@@ -31,6 +31,24 @@ namespace DollarRecognizer
 		goldenRatio    = 0.5 * (-1.0 + sqrt(5.0));
 	}
 
+        bool GeometricRecognizer::inTemplates(string templ, const string list[])
+        {
+            int i;
+            while (0!=list[i].compare("0") && 0!=list[i].compare(templ) )
+                i++;
+            if (0!=list[i].compare(templ))
+                return false;
+            else
+                return true;
+        }
+
+        void GeometricRecognizer::activateTemplates(const string list[])
+        {
+            for (int i=0; i<allTemplates.size() ; i++)
+                if (inTemplates(allTemplates.at(i).name, list))
+                    templates.push_back(allTemplates.at(i));
+        }
+
 	void GeometricRecognizer::loadTemplates()
 	{
 		SampleGestures samples;
@@ -64,8 +82,7 @@ namespace DollarRecognizer
 	{
 		points = normalizePath(points);
 
-		templates.push_back(GestureTemplate(name, points));
-
+                allTemplates.push_back(GestureTemplate(name, points));
 		//--- Let them know how many examples of this template we have now
 		int numInstancesOfGesture = 0;
 		// You know, i don't care so i'm just going to ignore this
@@ -214,7 +231,7 @@ namespace DollarRecognizer
 		if (templates.empty())
 		{
 			std::cout << "No templates loaded so no symbols to match." << std::endl;
-			return RecognitionResult("Unknown", NULL);
+                        return RecognitionResult("Unknown", 0);
 		}
 
 		points = normalizePath(points);
