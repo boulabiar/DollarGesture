@@ -33,7 +33,7 @@ namespace DollarRecognizer
 
         bool GeometricRecognizer::inTemplates(string templ, const string list[])
         {
-            int i;
+            unsigned int i=0;
             while (0!=list[i].compare("0") && 0!=list[i].compare(templ) )
                 i++;
             if (0!=list[i].compare(templ))
