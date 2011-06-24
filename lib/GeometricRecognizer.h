@@ -47,13 +47,16 @@ namespace DollarRecognizer
 		Path2D normalizePath(Path2D points);
 		double pathDistance(Path2D pts1, Path2D pts2);
 		double pathLength(Path2D points);
-		RecognitionResult recognize(Path2D points);
+                RecognitionResult recognize(Path2D points, string method="goldenSearch");
 		Path2D resample(Path2D points);
 		Path2D rotateBy(Path2D points, double rotation);
 		Path2D rotateToZero(Path2D points);
 		Path2D scaleToSquare(Path2D points);
 		void   setRotationInvariance(bool ignoreRotation);
 		Path2D translateToOrigin(Path2D points);
+                vector<double> vectorize(Path2D points); // for Protractor
+                double optimalCosineDistance(vector<double> v1, vector<double> v2); // for Protractor
+
 
                 void loadTemplates();
                 void activateTemplates(const string[]);

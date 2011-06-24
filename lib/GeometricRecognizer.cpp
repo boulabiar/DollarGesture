@@ -44,7 +44,7 @@ namespace DollarRecognizer
 
         void GeometricRecognizer::activateTemplates(const string list[])
         {
-            for (int i=0; i<allTemplates.size() ; i++)
+            for (unsigned int i=0; i<allTemplates.size() ; i++)
                 if (inTemplates(allTemplates.at(i).name, list))
                     templates.push_back(allTemplates.at(i));
         }
@@ -206,13 +206,55 @@ namespace DollarRecognizer
 		return points;
 	}
 
+        /*
+        double GeometricRecognizer::pathDistance(Path2D pts1, Path2D pts2)
+        {
+                // assumes pts1.size == pts2.size
+                double distance = 0.0;
+                for (int i = 0; i < (int)pts1.size(); i++)
+                        distance += getDistance(pts1[i], pts2[i]);
+                return (distance / pts1.size());
+        }
+        */
+
+        vector<double> GeometricRecognizer::vectorize(Path2D points) // for Protractor
+        {
+                double sum = 0.0;
+                vector<double> vectorized;
+                for (unsigned int i = 0; i < points.size(); i++)
+                {
+                        //vector[vector.length] = points[i].X;
+                        //vector[vector.length] = points[i].Y;
+                    vectorized.push_back(points[i].x);
+                    vectorized.push_back(points[i].y);
+                    sum += points[i].x * points[i].x + points[i].y * points[i].y;
+                }
+                double magnitude = sqrt(sum);
+                for (unsigned int i = 0; i < vectorized.size(); i++)
+                        vectorized[i] /= magnitude;
+                return vectorized;
+        }
+
+        double GeometricRecognizer::optimalCosineDistance(vector<double> v1, vector<double> v2) // for Protractor
+        {
+                double a = 0.0;
+                double b = 0.0;
+                for (unsigned int i = 0; i < v1.size(); i += 2)
+                {
+                        a += v1[i] * v2[i] + v1[i + 1] * v2[i + 1];
+                        b += v1[i] * v2[i + 1] - v1[i + 1] * v2[i];
+                }
+                double angle = atan(b / a);
+                return acos(a * cos(angle) + b * sin(angle));
+        }
+
 	double GeometricRecognizer::pathDistance(Path2D pts1, Path2D pts2)
 	{
 		// assumes pts1.size == pts2.size
 
 		double distance = 0.0;
-		for (int i = 0; i < (int)pts1.size(); i++) 
-			distance += getDistance(pts1[i], pts2[i]);
+                for (int i = 0; i < (int)pts1.size(); i++)
+                        distance += getDistance(pts1[i], pts2[i]);
 		return (distance / pts1.size());
 	}
 
@@ -224,7 +266,7 @@ namespace DollarRecognizer
 		return distance;
 	}
 
-	RecognitionResult GeometricRecognizer::recognize(Path2D points)
+        RecognitionResult GeometricRecognizer::recognize(Path2D points, string method)
 	{
 		//--- Make sure we have some templates to compare this to
 		//---  or else recognition will be impossible
@@ -238,31 +280,42 @@ namespace DollarRecognizer
 	
 		//--- Initialize best distance to the largest possible number
 		//--- That way everything will be better than that
-		double bestDistance = MAX_DOUBLE;
+                double bestDistance = MAX_DOUBLE;
 		//--- We haven't found a good match yet
 		int indexOfBestMatch = -1;
+                double score = 0.0;
 
-		//--- Check the shape passed in against every shape in our database
-		for (int i = 0; i < (int)templates.size(); i++)
-		{
-			//--- Calculate the total distance of each point in the passed in
-			//---  shape against the corresponding point in the template
-			//--- We'll rotate the shape a few degrees in each direction to
-			//---  see if that produces a better match
-			double distance = distanceAtBestAngle(points, templates[i]);
-			if (distance < bestDistance)
-			{
-				bestDistance     = distance;
-				indexOfBestMatch = i;
-			}
-		}
+                    //--- Check the shape passed in against every shape in our database
+                    for (int i = 0; i < (int)templates.size(); i++)
+                    {
+                        double distance;
+                            //--- Calculate the total distance of each point in the passed in
+                            //---  shape against the corresponding point in the template
+                            //--- We'll rotate the shape a few degrees in each direction to
+                            //---  see if that produces a better match
+                        if (method=="protractor")
+                            distance = optimalCosineDistance(vectorize(points), vectorize(templates[i].points));
+                        else
+                            distance = distanceAtBestAngle(points, templates[i]);
 
-		//--- Turn the distance into a percentage by dividing it by 
-		//---  half the maximum possible distance (across the diagonal 
-		//---  of the square we scaled everything too)
-		//--- Distance = hwo different they are
-		//--- Subtract that from 1 (100%) to get the similarity
-		double score = 1.0 - (bestDistance / halfDiagonal);
+                            //cout << distance<< " " << bestDistance << " ";
+                            //cout << " = " ;
+                            if (distance < bestDistance)
+                            {
+                                    bestDistance     = distance;
+                                    indexOfBestMatch = i;
+                            }
+                    }
+                    //--- Turn the distance into a percentage by dividing it by
+                    //---  half the maximum possible distance (across the diagonal
+                    //---  of the square we scaled everything too)
+                    //--- Distance = hwo different they are
+                    //--- Subtract that from 1 (100%) to get the similarity
+                    if (method=="protractor")
+                    { score = bestDistance ? (1.0 / bestDistance) : MAX_DOUBLE ; }
+                    else
+                        score = 1.0 - (bestDistance / halfDiagonal);
+                    //cout << score << "   " << bestDistance<< "   " ;
 
 		//--- Make sure we actually found a good match
 		//--- Sometimes we don't, like when the user doesn't draw enough points
@@ -271,7 +324,6 @@ namespace DollarRecognizer
 			cout << "Couldn't find a good match." << endl;
 			return RecognitionResult("Unknown", 1);
 		}
-
 		RecognitionResult bestMatch(templates[indexOfBestMatch].name, score);
 		return bestMatch;
 	};

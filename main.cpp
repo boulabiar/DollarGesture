@@ -87,8 +87,12 @@ int main()
     g.activateTemplates(gesturesList);
 
     RecognitionResult r=g.recognize(sampleGest());
-
     cout << "Recognized gesture: " << r.name << endl;
-    cout << "Score:" << r.score << endl;
+    cout << "1$ Score:" << r.score << endl;
+
+    RecognitionResult rp=g.recognize(sampleGest(), "protractor");
+    cout << "Recognized gesture: " << rp.name << endl;
+    cout << "Cosine Score:" << rp.score << endl;
+
     return 0;
 }
