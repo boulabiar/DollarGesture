@@ -206,29 +206,21 @@ namespace DollarRecognizer
 		return points;
 	}
 
-        /*
-        double GeometricRecognizer::pathDistance(Path2D pts1, Path2D pts2)
-        {
-                // assumes pts1.size == pts2.size
-                double distance = 0.0;
-                for (int i = 0; i < (int)pts1.size(); i++)
-                        distance += getDistance(pts1[i], pts2[i]);
-                return (distance / pts1.size());
-        }
-        */
-
         vector<double> GeometricRecognizer::vectorize(Path2D points) // for Protractor
         {
                 double sum = 0.0;
                 vector<double> vectorized;
+
+                // Preprocessing, Move from .x.y notation to 1D vector notation
+                // points[i](.x,.y) => vectorized(i, i+1, ...)
                 for (unsigned int i = 0; i < points.size(); i++)
                 {
-                        //vector[vector.length] = points[i].X;
-                        //vector[vector.length] = points[i].Y;
                     vectorized.push_back(points[i].x);
                     vectorized.push_back(points[i].y);
                     sum += points[i].x * points[i].x + points[i].y * points[i].y;
                 }
+                // normalize values : dividing by magnitude
+                // magnitude = sqrt ( sum_i(x²) + sum_i(y²) )
                 double magnitude = sqrt(sum);
                 for (unsigned int i = 0; i < vectorized.size(); i++)
                         vectorized[i] /= magnitude;
@@ -239,6 +231,10 @@ namespace DollarRecognizer
         {
                 double a = 0.0;
                 double b = 0.0;
+
+                // Compute protractor a and b values
+                // a = sum_i( xt_i*xg_i + yt_i*yg_i)
+                // b = sum_i( xt_i*yg_i - yt_i*xg_i)
                 for (unsigned int i = 0; i < v1.size(); i += 2)
                 {
                         a += v1[i] * v2[i] + v1[i + 1] * v2[i + 1];
@@ -255,7 +251,7 @@ namespace DollarRecognizer
 		double distance = 0.0;
                 for (int i = 0; i < (int)pts1.size(); i++)
                         distance += getDistance(pts1[i], pts2[i]);
-		return (distance / pts1.size());
+                return (distance / pts1.size());transavia.
 	}
 
 	double GeometricRecognizer::pathLength(Path2D points)
@@ -312,7 +308,7 @@ namespace DollarRecognizer
                     //--- Distance = hwo different they are
                     //--- Subtract that from 1 (100%) to get the similarity
                     if (method=="protractor")
-                    { score = bestDistance ? (1.0 / bestDistance) : MAX_DOUBLE ; }
+                        { score = bestDistance ? (1.0 / bestDistance) : MAX_DOUBLE ; }
                     else
                         score = 1.0 - (bestDistance / halfDiagonal);
                     //cout << score << "   " << bestDistance<< "   " ;
